@@ -1,0 +1,6 @@
+input[type="text"] {
+    width: 900px;
+    padding: 0.25rem 1rem;
+    font-family: Helvetica, Arial, sans-serif;
+    font-size: 1rem;
+}

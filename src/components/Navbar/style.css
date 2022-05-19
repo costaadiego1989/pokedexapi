@@ -1,0 +1,16 @@
+.pokeNavigation {
+    display: flex;
+    gap: 2rem;
+    list-style: none;
+}
+
+.pokeNavigation li {
+    font-size: 1.2rem;
+    font-weight: 600;
+    font-family: Helvetica, Arial, sans-serif;
+}
+
+.pokeNavigation li a {
+    text-decoration: none;
+    color: #393836;
+}
