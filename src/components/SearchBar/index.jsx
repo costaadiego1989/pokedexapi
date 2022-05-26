@@ -2,6 +2,7 @@ import "./style.css";
 import { Input } from "../Input";
 import { useState, useEffect } from "react";
 import { FaSearch } from "react-icons/fa";
+import { GrClose } from "react-icons/gr";
 import { PokeList } from "../PokeList/PokeList";
 import { getPokemon, getAllPokemons, getPokemonData } from "../../api";
 
@@ -14,30 +15,25 @@ export const SearchBar = () => {
 
   const [page, setPage] = useState(0);
   const [totalPages, setTotalPages] = useState(0);
+  const [dataCount, setDataCount] = useState(0);
 
   const [search, setSearch] = useState("");
 
   const itensPerPage = 24;
 
   const onSearchHandler = async () => {
-    if (!search) {
-      setLoading(true);
-      setNotFound(false);
-      const data = await getAllPokemons();
-      setSearch(data);
+    const pokemon = await getPokemon(search);
+    setPokemon(pokemon);
+    setPage(0);
+    setTotalPages(1);
+  };
+
+  const resetInput = async () => {
+    if (search) {
+      setPokemon(null);
+      setAllPokemons(await getAllPokemons());
+      setSearch("");
     }
-    if(search.value === 0) setSearch(getAllPokemons());
-    const results = await getPokemon(search);
-    if (!results) {
-      setNotFound(true);
-      if (notFound === true)
-        setError("Nenhum Pokémon foi encontrado. Digite novamente!");
-    } else {
-      setPokemon(results);
-      setPage(0);
-      setTotalPages(1);
-    }
-    setLoading(false);
   };
 
   useEffect(() => {
@@ -49,7 +45,7 @@ export const SearchBar = () => {
           return await getPokemonData(pk.url);
         });
         const results = await Promise.all(promises);
-        console.log(data);
+        setDataCount(data);
         setTotalPages(Math.ceil(data.count / itensPerPage));
         setAllPokemons(results);
         setLoading(false);
@@ -57,9 +53,8 @@ export const SearchBar = () => {
         console.log("Erro FetchPokemonData:", error);
       }
     };
-
     getListPokemons();
-  }, [page]);
+  }, [page, pokemon]);
 
   return (
     <>
@@ -71,14 +66,23 @@ export const SearchBar = () => {
             placeholder="Pesquisar um Pokémon..."
             onChange={(e) => setSearch(e.target.value)}
           />
-          <FaSearch
-            role="button"
-            style={{ cursor: "pointer" }}
-            onClick={onSearchHandler}
-          />
+
+          {pokemon ? (
+            <GrClose
+              onClick={resetInput}
+              role="button"
+              style={{ cursor: "pointer" }}
+            />
+          ) : (
+            <FaSearch
+              role="button"
+              style={{ cursor: "pointer" }}
+              onClick={search ? onSearchHandler : null}
+            />
+          )}
         </div>
       </form>
-
+      <p>{!pokemon ? error : null}</p>
       <PokeList
         pokemon={pokemon}
         pokeList={allPokemons}
@@ -87,6 +91,8 @@ export const SearchBar = () => {
         totalPages={totalPages}
         setPage={setPage}
         setError={error}
+        search={search}
+        data={dataCount}
       />
     </>
   );
