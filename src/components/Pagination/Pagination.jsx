@@ -7,6 +7,7 @@ export const Pagination = ({
   onRightClick,
   onLeftClick,
   pokemon,
+  notFound
 }) => {
   return (
     <div className="pokePagination">
@@ -14,7 +15,7 @@ export const Pagination = ({
         <FaArrowLeft />
       </button>
       <div>
-    Página {page} de {pokemon ? 1 : totalPages}
+    Página {notFound ? 0 : page} de {pokemon ? 1 : totalPages}
       </div>
       <button onClick={onRightClick}>
         <FaArrowRight />

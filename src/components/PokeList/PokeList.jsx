@@ -1,8 +1,10 @@
 import "./style.css";
 import { AiOutlineHeart } from "react-icons/ai";
+import { AiFillHeart } from "react-icons/ai";
 import { Pagination } from "../Pagination/Pagination";
 import { Loading } from "../Loading/index";
-import { useState } from "react";
+import { useContext } from "react";
+import { PokemonContext } from "../../context/PokemonContext";
 
 export const PokeList = ({
   pokeList,
@@ -12,8 +14,9 @@ export const PokeList = ({
   setPage,
   pokemon,
   data,
+  notFound,
 }) => {
-  const [toFavourites, setToFavourites] = useState();
+  const { pokemonList, updateList } = useContext(PokemonContext);
 
   const onLeftClick = () => {
     if (page > 0) setPage(page - 1);
@@ -23,8 +26,16 @@ export const PokeList = ({
     if (page <= totalPages) setPage(page + 1);
   };
 
-  const addToFavourites = (id, name) => {
-    console.log(id, name);
+  const addToFavorites = (pokemon) => {
+    let pokeArray = pokemonList;
+    pokeArray.push(pokemon);
+    updateList(pokeArray);
+  };
+
+  const removeFromFavorites = (pokemon) => {
+    let pokeArray = pokemonList;
+    pokeArray.pop(pokemon);
+    updateList(pokeArray);
   };
 
   return loading ? (
@@ -33,7 +44,13 @@ export const PokeList = ({
     pokeList && (
       <>
         <div className="pokeTitleAndPagination">
-          <h2 className="pokeListTitle">Lista de Pokémons ({data.count})</h2>
+          <h2 className="pokeListTitle">
+            Lista de Pokémons (
+            {!pokemon
+              ? pokeList.length + " de " + (data.count - pokeList.length * page)
+              : 1}
+            )
+          </h2>
           <div className="pokePagination">
             <Pagination
               page={page + 1}
@@ -41,6 +58,7 @@ export const PokeList = ({
               onLeftClick={onLeftClick}
               onRightClick={onRightClick}
               pokemon={pokemon}
+              notFound={notFound}
             />
           </div>
         </div>
@@ -48,7 +66,7 @@ export const PokeList = ({
           <div className="pokeListContent">
             {pokemon ? (
               <div className="pokeItem">
-                <div key={pokemon.id}>
+                <div className="hoverPokeItem" key={pokemon.id}>
                   <div className="pokeHeaderCard">
                     <div className="pokeImg">
                       <img
@@ -72,12 +90,21 @@ export const PokeList = ({
                       </div>
                     </div>
                     <div>
-                      <AiOutlineHeart
-                        className="pokeFavourite"
-                        role="button"
-                        value={pokemon.id}
-                        onClick={() => addToFavourites(pokemon.id)}
-                      />
+                      {pokemonList.find((pk) => pk.id === pokemon.id) ? (
+                        <AiFillHeart
+                          style={{ color: "red" }}
+                          className="pokeFavourite"
+                          value={pokemon}
+                          onClick={() => removeFromFavorites()}
+                        />
+                      ) : (
+                        <AiOutlineHeart
+                          className="pokeFavourite"
+                          role="button"
+                          value={pokemon}
+                          onClick={() => addToFavorites(pokemon)}
+                        />
+                      )}
                     </div>
                   </div>
                 </div>
@@ -85,7 +112,7 @@ export const PokeList = ({
             ) : (
               pokeList.map((poke, index) => (
                 <div key={index} className="pokeItem">
-                  <div key={poke.id}>
+                  <div className="hoverPokeItem" key={poke.id}>
                     <div className="pokeHeaderCard">
                       <div>
                         <img src={poke.sprites.front_default} alt={poke.name} />
@@ -106,12 +133,21 @@ export const PokeList = ({
                         </div>
                       </div>
                       <div>
-                        <AiOutlineHeart
-                          className="pokeFavourite"
-                          role="button"
-                          value={poke.id}
-                          onClick={() => addToFavourites(poke.id, poke.name)}
-                        />
+                        {pokemonList.find((pk) => pk.id === poke.id) ? (
+                          <AiFillHeart
+                            style={{ color: "red" }}
+                            className="pokeFavourite"
+                            value={poke}
+                            onClick={() => removeFromFavorites()}
+                          />
+                        ) : (
+                          <AiOutlineHeart
+                            className="pokeFavourite"
+                            role="button"
+                            value={poke}
+                            onClick={() => addToFavorites(poke)}
+                          />
+                        )}
                       </div>
                     </div>
                   </div>

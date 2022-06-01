@@ -21,18 +21,68 @@ export const SearchBar = () => {
 
   const itensPerPage = 24;
 
-  const onSearchHandler = async () => {
+  const onSearchHandler = async (e) => {
+    e.preventDefault();
     const pokemon = await getPokemon(search);
     setPokemon(pokemon);
     setPage(0);
     setTotalPages(1);
+
+    if (search.value.length === 0) {
+      console.log("oi");
+      setNotFound(true);
+      setError("Digite ao menos o nome de um Pokémon. =(");
+      setPage(0);
+      setTotalPages(0);
+    }
+
+    if (!pokemon && !notFound) {
+      setNotFound(true);
+      setError("Não foi encontrado nenhum Pokémon com este nome. =(");
+      setPage(0);
+      setTotalPages(0);
+    }
+
+    if (pokemon && notFound) {
+      setNotFound(false);
+      setError("");
+    }
+  };
+
+  const onHandleKeyPress = async (e) => {
+    if (e.key === "Enter" && !search) {
+      e.preventDefault();
+    }
+    if (e.key === "Enter" && search) {
+      e.preventDefault();
+      const pokemon = await getPokemon(search);
+      setPokemon(pokemon);
+      setNotFound(false);
+      setPage(0);
+      setTotalPages(1);
+    }
+    if (e.key === "Enter" && search && pokemon === null) {
+      e.preventDefault();
+     console.log("sdfsdfsd");
+    }
+    if (e.key === "Enter" && search && pokemon) {
+      e.preventDefault();
+      const pokemon = await getPokemon();
+      setPokemon(pokemon);
+      setNotFound(false);
+      setPage(0);
+      setTotalPages(1);
+    }
   };
 
   const resetInput = async () => {
     if (search) {
-      setPokemon(null);
+      setPokemon();
       setAllPokemons(await getAllPokemons());
       setSearch("");
+      setNotFound(false);
+      setPage(0);
+      setTotalPages(1);
     }
   };
 
@@ -65,9 +115,10 @@ export const SearchBar = () => {
             value={search}
             placeholder="Pesquisar um Pokémon..."
             onChange={(e) => setSearch(e.target.value)}
+            onKeyPress={(e) => onHandleKeyPress(e)}
           />
 
-          {pokemon ? (
+          {pokemon || !!error !== false ? (
             <GrClose
               onClick={resetInput}
               role="button"
@@ -82,7 +133,7 @@ export const SearchBar = () => {
           )}
         </div>
       </form>
-      <p>{!pokemon ? error : null}</p>
+      <p style={{ textAlign: "center" }}>{error}</p>
       <PokeList
         pokemon={pokemon}
         pokeList={allPokemons}
@@ -93,6 +144,7 @@ export const SearchBar = () => {
         setError={error}
         search={search}
         data={dataCount}
+        notFound={notFound}
       />
     </>
   );
